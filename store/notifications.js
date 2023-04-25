@@ -1,5 +1,3 @@
-import { markAllAsRead } from "~/api/database/notifications"
-
 export const state = () => ({
     notifs: [],
     newNotif: false,
@@ -21,7 +19,7 @@ export const actions = {
     async getNotifs({ commit, rootState }, {}) {
         const userid = JSON.parse(rootState.accounts.user).id
         try {
-            const res = await this.$axios.get(`/api/notifications?userid=${userid}`)
+            const res = await this.$axios.get(`${API}/notifications?userid=${userid}`)
             if (res.status === 200) {
                 let newNotif = false
                 for (let i = 0; i < res.data.length; ++i) {
@@ -40,7 +38,7 @@ export const actions = {
     async sendNotif({ rootState }, { userid, journalid, text, title }) {
         try {
             const name = `${JSON.parse(rootState.accounts.user).firstname} ${JSON.parse(rootState.accounts.user).lastname}`
-            const res = await this.$axios.post('/api/notifications', {
+            const res = await this.$axios.post(`${API}/notifications`, {
                     userid: userid,
                     senderid: JSON.parse(rootState.accounts.user).id,
                     sendername: name,
@@ -59,7 +57,7 @@ export const actions = {
 
     async markRead({ dispatch }, { notifid }) {
         try {
-            const res = await this.$axios.put(`/api/notifications/${notifid}`, {
+            const res = await this.$axios.put(`${API}/notifications/${notifid}`, {
                 seen: true
             })
             if (res.status === 200) {
@@ -73,7 +71,7 @@ export const actions = {
     async markAllAsRead({ commit, rootState }, {}) {
         try {
             const userid = JSON.parse(rootState.accounts.user).id
-            const res = await this.$axios.put(`/api/notifications?userid=${userid}`)
+            const res = await this.$axios.put(`${API}/notifications?userid=${userid}`)
             if (res.status === 200) {
                 for (let i = 0; i < res.data.length; ++i) {
                     res.data[i].date =  await parseDate(res.data[i].date)

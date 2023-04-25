@@ -4,7 +4,7 @@ export default {
   server: {
     host: '0.0.0.0'
   },
- // target: 'static',
+  target: 'static',
   middleware: ["auth"],
   // Disable server-side rendering: https://go.nuxtjs.dev/ssr-mode
   ssr: false,
@@ -83,10 +83,10 @@ export default {
   build: {
   },
 
-  serverMiddleware: [
-    {
-      path: '/api',
-      handler: '~/api/server.js'
-    }
-  ]
+  // serverMiddleware: [
+  //   {
+  //     path: '/api',
+  //     handler: 'http://ec2-18-144-43-167.us-west-1.compute.amazonaws.com:3001/writenow-api/api/server.js'
+  //   }
+  // ]
 }

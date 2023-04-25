@@ -30,7 +30,7 @@ export const mutations = {
 export const actions = {
     async getPrompt({ commit, state }, { isNew }) {
         // generate new prompt
-        const response = await this.$axios.get('/api/prompts')
+        const response = await this.$axios.get(`${API}/prompts`)
         if (response.status === 200) {
             await commit('setPrompt', response.data)
             localStorage.setItem('prompt', JSON.stringify(response.data))
@@ -39,7 +39,7 @@ export const actions = {
             if (isNew) {
               try {
                 // add that new prompt to active_prompt table
-                const res = await this.$axios.post('/api/prompts', {
+                const res = await this.$axios.post(`${API}/prompts`, {
                     userid: JSON.parse(state.user).id,
                     promptid: response.data.promptid,
                     dateadded: new Date().toDateString()
@@ -54,7 +54,7 @@ export const actions = {
           else {
               try {
                 // update the user's active prompt
-                const res = await this.$axios.put(`/api/prompts/${JSON.parse(state.user).id}`, {
+                const res = await this.$axios.put(`${API}/prompts/${JSON.parse(state.user).id}`, {
                     promptid: response.data.promptid,
                     dateadded: new Date().toDateString()
                 })
@@ -72,7 +72,7 @@ export const actions = {
         const today = new Date().toDateString()
         try {
             // get the user's active prompt
-            const active_prompt = await this.$axios.get(`/api/prompts/${JSON.parse(state.user).id}`)
+            const active_prompt = await this.$axios.get(`${API}/prompts/${JSON.parse(state.user).id}`)
             // prompt is old, get a new one
             if (active_prompt.data.dateadded !== today) {
                 dispatch('getPrompt', { isNew: false })
@@ -89,7 +89,7 @@ export const actions = {
 
     async signup({ dispatch, commit }, { firstname, lastname, username, password }) {
         try {
-            const response = await this.$axios.post('/api/accounts', {
+            const response = await this.$axios.post(`${API}/accounts`, {
                 firstname: firstname,
                 lastname: lastname,
                 username: username,
@@ -107,7 +107,7 @@ export const actions = {
 
     async login({ dispatch, commit }, { username, password, isNew }) {
         try {
-            const response = await this.$axios.put('/api/authentication/login', {
+            const response = await this.$axios.put(`${API}/authentication/login`, {
                 username,
                 password,
                 isNew
@@ -129,7 +129,7 @@ export const actions = {
     },
 
     async logout ({ commit }) {
-        const res = await this.$axios.put('/api/authentication/logout')
+        const res = await this.$axios.put(`${API}/authentication/logout`)
         if (res.status === 200) {
             localStorage.removeItem('prompt')
             localStorage.removeItem('newestEntry')
@@ -142,7 +142,7 @@ export const actions = {
 
     async getNotifTime({ commit, state }) {
         try {
-            const res = await this.$axios.get('/api/accounts/' + JSON.parse(state.user).id)
+            const res = await this.$axios.get(`${API}/accounts/${JSON.parse(state.user).id}`)
             if (res.status === 200) {
                 await commit('notifTime', await prettyTime(res.data.notif_time))
             }
@@ -156,18 +156,18 @@ export const actions = {
     async update({ dispatch }, { currentPass, newPass, notif_time, userid }) {
         try {
             if (currentPass === undefined && newPass === undefined && notif_time !== undefined) {
-                const res = await this.$axios.put(`/api/accounts/${userid}?notif_time=${notif_time}`)
+                const res = await this.$axios.put(`${API}/accounts/${userid}?notif_time=${notif_time}`)
                 if (res.status === 200) {
                     alert('Your notification time has been successfully updated. It will take effect in the next day.')
                     dispatch('getNotifTime')
                 }
             } else if (currentPass !== undefined && newPass !== undefined && notif_time === undefined) {
-                const res = await this.$axios.put(`/api/accounts/${userid}?currentPass=${currentPass}&newPass=${newPass}`)
+                const res = await this.$axios.put(`${API}/accounts/${userid}?currentPass=${currentPass}&newPass=${newPass}`)
                 if (res.status === 200) {
                     alert('Your password has been successfully updated')
                 }
             } else if (currentPass !== undefined && newPass !== undefined && notif_time !== undefined) {
-                const res = await this.$axios.put(`/api/accounts/${userid}?currentPass=${currentPass}&newPass=${newPass}&notif_time=${notif_time}`)
+                const res = await this.$axios.put(`${API}/accounts/${userid}?currentPass=${currentPass}&newPass=${newPass}&notif_time=${notif_time}`)
                 if (res.status === 200) {
                     alert('Your password and notification time have been successfully updated. Your new notification time will take effect in the next day.')
                     await dispatch('getNotifTime')
@@ -188,7 +188,7 @@ export const actions = {
 
     async delete({ commit }, { userid }) {
         try {
-            const res = await this.$axios.delete('/api/accounts/' + userid)
+            const res = await this.$axios.delete(`${API}/accounts/${userid}`)
             if (res.status === 204) {
                 commit('setUser', null)
                 localStorage.removeItem('prompt')
