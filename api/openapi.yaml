@@ -1,0 +1,915 @@
+openapi: 3.0.3
+info:
+  title: Daily Journal
+  version: v1.0
+paths:
+  /accounts:
+    x-controller: accounts
+    post:
+      x-operation: createAccount
+      tags:
+        - Accounts
+      summary: Create an account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - firstname
+                - lastname
+                - username
+                - password
+              properties:
+                firstname:
+                  type: string
+                lastname: 
+                  type: string
+                username:
+                  type: string
+                password:
+                  type: string
+                  format: password
+                  minLength: 4
+            example:
+              firstname: Andrew
+              lastname: Thibaudeau
+              username: example@username.com
+              password: password
+      responses:
+        201:
+          description: Account created
+        400:
+          description: Invalid request
+        409:
+          description: Account already exists
+  /accounts/{userid}:
+    x-controller: accounts
+    parameters:
+      - $ref: '#/components/parameters/PathUserid'
+    get:
+      x-operation: getNotifTime
+      tags:
+        - Accounts
+      security:
+        - cookieAuth: []
+      summary: Get the user's notification time
+      responses:
+        200:
+          description: Success
+        400:
+          description: Bad request
+        401:
+          description: Unauthorized
+        404:
+          description: Not found
+    delete: 
+      x-operation: deleteAccount
+      tags:
+        - Accounts
+      security:
+        - cookieAuth: []
+      summary: Delete an account
+      responses:
+        204: 
+          description: Account deleted
+        400:
+          description: Bad request
+        401:
+          description: Not authenticated
+        403:
+          description: Access denied
+    put:
+      x-operation: updateAccount
+      parameters:
+        - $ref: '#/components/parameters/QueryCurrentPass'
+        - $ref: '#/components/parameters/QueryNewPass'
+        - $ref: '#/components/parameters/QueryNotifTime'
+      tags:
+        - Accounts
+      security:
+        - cookieAuth: []
+      summary: Update user password
+      responses:
+        200:
+          description: Account updated
+        400:
+          description: Invalid request
+        401:
+          description: Not authenticated
+        403:
+          description: Access denied
+        404:
+          description: Account not found
+  /authentication/login:
+    x-controller: authentication
+    put:
+      x-operation: login
+      tags:
+        - Authentication
+      summary: Login to an account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+                - isNew
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                  format: password
+                  minLength: 4
+                isNew:
+                  type: boolean
+            example:
+              username: a.thibs98@gmail.com
+              password: a-password
+              isNew: true
+      responses:
+        200:
+          description: Account logged in
+        400:
+          description: Invalid request
+        401:
+          description: Not authenticated
+        404:
+          description: Account does not exist
+  /authentication/logout:
+    x-controller: authentication
+    put:
+      x-operation: logout
+      tags:
+        - Authentication
+      summary: Logout of an account
+      responses:
+        200:
+          description: Account logged out
+        400:
+          description: Invalid request
+  /notifications:
+    x-controller: notifications
+    get:
+      x-operation: getNotifs
+      parameters:
+        - $ref: '#/components/parameters/QueryUserid'
+      tags:
+        - Notifications
+      security:
+        - cookieAuth: []
+      summary: Get the user's notifications
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notifications'
+        400:
+          description: Bad request
+        401:
+          description: Unauthorized
+        404:
+          description: Not found
+    put:
+      x-operation: markAllAsRead
+      parameters:
+        - $ref: '#/components/parameters/QueryUserid'
+      tags:
+        - Notifications
+      security:
+        - cookieAuth: []
+      summary: Update all notifications for user
+      responses:
+        200:
+          description: Success
+        400:
+          description: Bad request
+        401:
+          description: Unauthorized
+        404:
+          description: Not found
+    post:
+      x-operation: sendNotif
+      tags:
+        - Notifications
+      security:
+        - cookieAuth: []
+      summary: Send a notification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userid
+                - senderid
+                - sendername
+                - date
+                - journalid
+                - text
+                - title
+              properties:
+                userid:
+                  type: number
+                senderid:
+                  type: number
+                sendername:
+                  type: string
+                date:
+                  type: string
+                  format: date-time
+                journalid:
+                  type: number
+                text:
+                  type: string
+                title:
+                  type: string
+      responses:
+        201:
+            description: Success
+        400:
+          description: Bad request
+        401:
+          description: Unauthorized
+  /notifications/{notifid}:
+    x-controller: notifications
+    parameters:
+      - $ref: '#/components/parameters/PathNotifid'
+    put:
+      x-operation: markRead
+      tags:
+        - Notifications
+      security:
+        - cookieAuth: []
+      summary: Update a notification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - seen
+              properties:
+                seen:
+                  type: boolean
+              example:
+                seen: true
+      responses:
+        200:
+          description: Success
+        400:
+          description: Bad request
+        401:
+          description: Unauthorized
+        404:
+          description: Not found
+  /share:
+    x-controller: share
+    post:
+      x-operation: shareEntry
+      tags:
+        - Share
+      security:
+        - cookieAuth: []
+      summary: Share an entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - entryid
+                - owner
+                - userid
+              properties:
+                entryid:
+                  type: number
+                owner:
+                  type: number
+                userid:
+                  type: number
+            example:
+              entryid: 1
+              owner: 1
+              userid: 1
+      responses:
+        201:
+          description: Success
+        400:
+          description: Bad request
+        401:
+          description: Unauthorized
+    get:
+      x-operation: search
+      parameters:
+        - $ref: '#/components/parameters/QuerySearchText'
+        - $ref: '#/components/parameters/QueryEntryid'
+      tags:
+        - Share
+      security:
+        - cookieAuth: []
+      summary: Search for users to share entry with or get the shared list for an entry
+      responses:
+        200:
+          description: Success
+        400:
+          description: Bad request
+        404:
+          description: Not found
+  /share/{userid}:
+    x-controller: share
+    parameters:
+      - $ref: '#/components/parameters/PathUserid'
+    post:
+      x-operation: sharePrompt
+      tags:
+        - Share
+      security:
+        - cookieAuth: []
+      summary: Share a prompt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - promptid
+                - sender
+              properties:
+                promptid:
+                  type: number
+                sender:
+                  type: number
+            example:
+              promptid: 1
+              sender: 1
+      responses:
+        201:
+          description: Success
+        400:
+          description: Bad request
+        401:
+          description: Unauthorized
+    get:
+      x-operation: getSharedWithMe
+      parameters:
+        - $ref: '#/components/parameters/QueryGetWhat'
+      tags:
+        - Share
+      security:
+        - cookieAuth: []
+      summary: Get all entries and prompts shared with me
+      responses:
+        200:
+          description: Success
+        400:
+          description: Bad request
+        401:
+          description: Unauthorized
+        404:
+          description: Not found
+    delete:
+      x-operation: unsharePrompt
+      parameters:
+        - $ref: '#/components/parameters/QueryPromptid'
+        - $ref: '#/components/parameters/QuerySender'
+      tags:
+        - Share
+      security:
+        - cookieAuth: []
+      summary: Remove a prompt from being shared with me
+      responses:
+        204:
+          description: Success
+        400:
+          description: Bad request
+  /share/{entryid}/{userid}:
+    x-controller: share
+    parameters:
+        - $ref: '#/components/parameters/PathEntryid'
+        - $ref: '#/components/parameters/PathUserid'
+    delete:
+      x-operation: unshareEntry
+      tags:
+        - Share
+      security:
+        - cookieAuth: []
+      summary: Unshare an entry
+      responses:
+        204:
+          description: Success
+        400:
+          description: Bad request
+  /groups:
+    x-controller: groups
+    post:
+      x-operation: createGroup
+      tags:
+        - Groups
+      security:
+        - cookieAuth: []
+      summary: Create a group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - groupname
+                - joincode
+              properties:
+                groupname:
+                  type: string
+                joincode:
+                  type: string
+            example:
+              groupname: 'Group'
+              joincode: 'code'
+      responses:
+        201:
+          description: Success
+        400:
+          description: Bad request
+        401:
+          description: Unauthorized
+  /prompts:
+    x-controller: prompts
+    get:
+      x-operation: getPrompt
+      tags:
+        - Prompts
+      security:
+        - cookieAuth: []
+      summary: Get a prompt
+      responses:
+        200:
+          description: Prompt retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prompt'
+        400:
+          description: Invalid request
+        404:
+          description: Not found
+    post:
+      x-operation: setActivePrompt
+      tags:
+        - Prompt
+      security:
+        - cookieAuth: []
+      summary: Set the active prompt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userid
+                - promptid
+                - dateadded
+              properties:
+                userid:
+                  type: number
+                promptid: 
+                  type: number
+                dateadded:
+                  type: string
+            example:
+              userid: 1
+              promptid: 1
+              dateadded: "Mon Mar 28 2022"
+      responses:
+        201:
+          description: Active prompt set
+        400:
+          description: Invalid request
+        401:
+          description: Unauthorized
+  /prompts/{userid}:
+    x-controller: prompts
+    parameters:
+      - $ref: '#/components/parameters/PathUserid'
+    get:
+      x-operation: activePrompt
+      tags:
+        - Prompts
+      security:
+        - cookieAuth: []
+      summary: Get a user's active prompt
+      responses:
+        200:
+          description: Prompt retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivePrompt'
+        400:
+          description: Invalid request
+        401:
+          description: Unauthorized
+        404:
+          description: Not found
+    put:
+      x-operation: updateActivePrompt
+      tags:
+        - Prompts
+      security:
+        - cookieAuth: []
+      summary: Update the active prompt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - promptid
+                - dateadded
+              properties:
+                promptid:
+                  type: number
+                dateadded:
+                  type: string
+            example:
+              promptid: 1
+              dateadded: "Mon Mar 28 2022"
+      responses:
+        200:
+          description: Active prompt updated
+        400:
+          description: Bad request
+        401:
+          description: Unauthorized
+        404:
+          description: User not found
+  /topics:
+    x-controller: topics
+    get:
+      x-operation: getTopics
+      tags:
+        - Topics
+      security:
+        - cookieAuth: []
+      summary: Get all topics
+      responses:
+        200:
+          description: Success
+        400:
+          description: Bad request
+        401:
+          description: Unauthorized
+        404:
+          description: Not found
+  /entries:
+    x-controller: entries
+    get:
+      x-operation: filterEntries
+      tags:
+        - Entries
+      security:
+        - cookieAuth: []
+      summary: Filter entries by date or topic
+      parameters:
+        - $ref: '#/components/parameters/QueryAfterdate'
+        - $ref: '#/components/parameters/QueryTopicid'
+        - $ref: '#/components/parameters/QueryUserid'
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entries'
+        400:
+          description: Invalid request
+        401:
+          description: Not authenticated
+        404:
+          description: Not found
+    post:
+      x-operation: submitEntry
+      tags:
+        - Entries
+      security:
+        - cookieAuth: []
+      summary: Submit an entry
+      requestBody:
+        $ref: '#/components/requestBodies/MakeEntry'
+      responses:
+        201:
+          description: Entry submitted
+        400:
+          description: Invalid request
+        401:
+          description: Not authenticated
+  /entries/{userid}/{today}:
+    x-controller: entries
+    parameters:
+      - $ref: '#/components/parameters/Pathtoday'
+      - $ref: '#/components/parameters/PathUserid'
+    get:
+      x-operation: getEntriesToday
+      tags:
+        - Entries
+      security:
+        - cookieAuth: []
+      summary: Get entries submitted today
+      responses:
+        200:
+          description: Today's entries loaded
+        400:
+          description: Bad request
+        401:
+          description: Unauthorized
+        404:
+          description: Not found
+  /entries/{entryid}:
+    x-controller: entries
+    parameters:
+      - $ref: '#/components/parameters/PathEntryid'
+    put:
+      x-operation: updateEntry
+      tags:
+        - Entries
+      security:
+        - cookieAuth: []
+      summary: Update an entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+              properties:
+                text:
+                  type: string
+      responses:
+        200:
+          description: Entry updated
+        400:
+          description: Update failed
+        401:
+          description: Not authenticated
+        403:
+          description: Access denied
+        404: 
+          description: Entry not found
+    delete:
+      x-operation: deleteEntry
+      tags:
+        - Entries
+      security:
+        - cookieAuth: []
+      summary: Delete an entry
+      responses:
+        204:
+          description: Entry deleted
+        400:
+          description: Bad request
+        401:
+          description: Not authenticated
+        403:
+          description: Access denied
+components:
+  parameters:
+    QueryCurrentPass:
+      name: currentPass
+      in: query
+      required: false
+      schema:
+        type: string
+    QueryNewPass:
+      name: newPass
+      in: query
+      required: false
+      schema:
+        type: string
+    QueryNotifTime:
+      name: notif_time
+      in: query
+      required: false
+      schema:
+        type: string
+    QueryGetWhat:
+      name: type
+      in: query
+      required: false
+      schema:
+        type: string
+    QueryUserid:
+      name: userid
+      in: query
+      required: true
+      schema:
+        type: number
+    QuerySender:
+      name: sender
+      in: query
+      required: false
+      schema:
+        type: number
+    QueryTopicid:
+      name: topicid
+      in: query
+      required: false
+      schema:
+        type: number
+    QueryAfterdate:
+      name: afterdate
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date-time
+    QueryPromptid:
+      name: promptid
+      in: query
+      required: false
+      schema:
+        type: number
+    QueryEntryid:
+      name: entryid
+      in: query
+      required: false
+      schema:
+        type: number
+    QueryNotifid:
+      name: notifid
+      in: query
+      required: true
+      schema:
+        type: number
+    QuerySearchText:
+      name: searchtext
+      in: query
+      required: false
+      schema:
+        type: string
+    PathUserid:
+      name: userid
+      in: path
+      required: true
+      schema:
+        type: string
+    PathNotifid:
+      name: notifid
+      in: path
+      required: true
+      schema:
+        type: number
+    Pathusername:
+      name: username
+      in: path
+      required: true
+      schema:
+        type: string
+    PathEntryid:
+      name: entryid
+      in: path
+      required: true
+      schema:
+        type: number
+    Pathtoday:
+      name: today
+      in: path
+      required: true
+      schema:
+        type: string
+        format: date-time
+  requestBodies:
+    MakeEntry:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - response
+                - date
+                - userid
+                - promptid
+              properties:
+                response:
+                  type: string
+                date:
+                  type: string
+                  format: date-time
+                userid:
+                  type: number
+                promptid:
+                  type: number               
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: journalSessionId
+  schemas:
+    ActivePrompt:
+      type: object
+      properties:
+        dateadded:
+          type: string
+          readOnly: true
+        promptid:
+          type: number
+          readOnly: true
+        prompttext:
+          type: string
+          readOnly: true
+        topicid:
+          type: number
+          readOnly: true
+        topictext:
+          type: string
+          readOnly: true
+    Prompt:
+      type: object
+      properties:
+        promptid:
+          type: number
+          readOnly: true
+        prompttext:
+          type: string
+          readOnly: true
+        topictext:
+          type: string
+          readOnly: true
+        topicid:
+          type: number
+          readOnly: true
+    Notifications:
+      type: array
+      items:
+        $ref: '#/components/schemas/Notification'
+    Notification:
+      type: object
+      properties:
+        notifid:
+          type: number
+          readOnly: true
+        userid:
+          type: number
+          readOnly: true
+        senderid:
+          type: number
+          readOnly: true
+        sendername:
+          type: string
+          readOnly: true
+        date:
+          type: string
+          format: date-time
+          readOnly: true
+        seen:
+          type: boolean
+          readOnly: false
+        journalid:
+          type: number
+          readOnly: true
+        text:
+          type: string
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+    GetEntry:
+      type: object
+      properties:
+        promptid:
+          type: number
+          readOnly: true
+        prompttext:
+          type: string
+          readOnly: true
+        topic:
+          type: string
+          readOnly: true
+        entryid:
+          type: number
+          readOnly: true
+        text:
+          type: string
+        date:
+          type: string
+          format: date-time
+    Entries:
+      type: array
+      items:
+        $ref: '#/components/schemas/GetEntry'
+          
