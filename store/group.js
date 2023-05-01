@@ -1,3 +1,5 @@
+import { API } from "~/store/api"
+
 export const state = () => ({
     userGroups: [
         {
@@ -28,7 +30,7 @@ export const actions = {
     async getNotifs({ commit, rootState }, {}) {
         const userid = JSON.parse(rootState.accounts.user).id
         try {
-            const res = await this.$axios.get(`${API}/notifications?userid=${userid}`)
+            const res = await this.$axios.get(`api/notifications?userid=${userid}`)
             if (res.status === 200) {
                 let newNotif = false
                 for (let i = 0; i < res.data.length; ++i) {

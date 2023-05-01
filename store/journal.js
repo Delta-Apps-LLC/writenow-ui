@@ -1,3 +1,5 @@
+import { API } from "~/store/api"
+
 export const state = () => ({
       newestEntry: {},
       entriesList: [],
@@ -22,7 +24,7 @@ export const mutations = {
 // actions should call mutations
 export const actions = {
   async submit({ commit }, { response, userid, promptid }) {
-    const res = await this.$axios.post(`${API}/entries`, {
+    const res = await this.$axios.post(`api/entries`, {
             response: response,
             date: await todayTimestamp(),
             userid: userid,
@@ -40,7 +42,7 @@ export const actions = {
     let today = await todayTimestamp()
     let userid = JSON.parse(rootState.accounts.user).id
     try {
-      const res = await this.$axios.get(`${API}/entries/${userid}/${today}`)
+      const res = await this.$axios.get(`api/entries/${userid}/${today}`)
       if (res.status === 200) {
         for (let i = 0; i < res.data.length; ++i) {
           res.data[i].date = await parseDate(res.data[i].date)
@@ -57,7 +59,7 @@ export const actions = {
   },
 
   async loadTopics({ commit }) {
-    const topics = await this.$axios.get(`${API}/topics`)
+    const topics = await this.$axios.get(`api/topics`)
     if (topics.status === 200) {
       await commit('topics', topics.data)
     }
@@ -68,7 +70,7 @@ export const actions = {
       let afterDate = ""
       let topicid = null;
       (filterMethod.toString().length === 1) ? topicid = filterMethod : afterDate = filterMethod
-      const res = await this.$axios.put(`${API}/entries/${entryid}`, {
+      const res = await this.$axios.put(`api/entries/${entryid}`, {
         text: text
       })
       if (res.status === 200) {
@@ -92,7 +94,7 @@ export const actions = {
       let afterDate = ""
       let topicid = null;
       (filterMethod.toString().length === 1) ? topicid = filterMethod : afterDate = filterMethod
-      const res = await this.$axios.delete(`${API}/entries/${entryid}`)
+      const res = await this.$axios.delete(`api/entries/${entryid}`)
       if (res.status === 204) {
         //alert(`Entry number ${entryid} has successfully been deleted`)
         if (filterMethod === "today") dispatch('loadEntries')
@@ -112,7 +114,7 @@ export const actions = {
   async filterDate({ commit }, { afterDate, userid }) {
     await commit('entriesList', [])
     afterDate += 'T00:00:00.000Z'
-    const res = await this.$axios.get(`${API}/entries?afterdate=${afterDate}&userid=${userid}`)
+    const res = await this.$axios.get(`api/entries?afterdate=${afterDate}&userid=${userid}`)
     if (res.status === 200) {
       for (let i = 0; i < res.data.length; ++i) {
         res.data[i].date = await parseDate(res.data[i].date)
@@ -124,7 +126,7 @@ export const actions = {
 
   async filterTopic({ commit }, { topicid, userid }) {
     await commit('entriesList', [])
-    const res = await this.$axios.get(`${API}/entries?topicid=${topicid}&userid=${userid}`)
+    const res = await this.$axios.get(`api/entries?topicid=${topicid}&userid=${userid}`)
     if (res.status === 200) {
       for (let i = 0; i < res.data.length; ++i) {
         res.data[i].date = await parseDate(res.data[i].date)

@@ -1,4 +1,5 @@
 import colors from 'vuetify/es5/util/colors'
+const { createProxyMiddleware } = require('http-proxy-middleware')
 
 export default {
   server: {
@@ -83,10 +84,11 @@ export default {
   build: {
   },
 
-  // serverMiddleware: [
-  //   {
-  //     path: '/api',
-  //     handler: 'http://ec2-18-144-43-167.us-west-1.compute.amazonaws.com:3001/writenow-api/api/server.js'
-  //   }
-  // ]
+  serverMiddleware: [
+    // Proxy middleware
+    createProxyMiddleware('/api', {
+      target: 'http://ec2-18-144-43-167.us-west-1.compute.amazonaws.com:3001',
+      changeOrigin: true,
+    })
+  ]
 }

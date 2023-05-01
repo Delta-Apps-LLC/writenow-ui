@@ -1,3 +1,5 @@
+import { API } from "~/store/api"
+
 export const state = () => ({
     resultsE: [],
     resultsP: [],
@@ -43,7 +45,7 @@ export const mutations = {
 export const actions = {
     async search({ commit }, { searchText, sharing }) {
         try {
-            const res = await this.$axios.get(`${API}/share?searchtext=${searchText}`)
+            const res = await this.$axios.get(`api/share?searchtext=${searchText}`)
             if (res.status === 200) {
                 (sharing === 0) 
                     ? await commit('updateResultsE', res.data)
@@ -62,7 +64,7 @@ export const actions = {
         await commit('entryBeingShared', entry)
         await commit('promptBeingShared', entry)
         try {
-            const res = await this.$axios.get(`${API}/share?entryid=${entry.entryid}`)
+            const res = await this.$axios.get(`api/share?entryid=${entry.entryid}`)
             if (res.status === 200) {
                 await commit('setSharedList', res.data)
             }
@@ -76,7 +78,7 @@ export const actions = {
     async shareEntry({ dispatch }, { entry, owner, users, title }) {
         try {
             for (let i = 0; i < users.length; ++i) {
-                const res = await this.$axios.post(`${API}/share`, {
+                const res = await this.$axios.post(`api/share`, {
                     entryid: entry.entryid,
                     owner: owner,
                     userid: users[i]
@@ -103,7 +105,7 @@ export const actions = {
     async sharePrompt({ dispatch }, { prompt, sender, users }) {
         try {
             for (let i = 0; i < users.length; ++i) {
-                const res = await this.$axios.post(`${API}/share/${users[i].userid}`, {
+                const res = await this.$axios.post(`api/share/${users[i].userid}`, {
                     promptid: prompt.promptid,
                     sender: sender
                 })
@@ -128,7 +130,7 @@ export const actions = {
 
     async unshareEntry({ dispatch }, { entry, userid, type }) {
         try {
-            const res = await this.$axios.delete(`${API}/share/${entry.entryid}/${userid}`)
+            const res = await this.$axios.delete(`api/share/${entry.entryid}/${userid}`)
             if (res.status === 204) {
                 (type === "owner")
                     ? await dispatch('getSharedList', { entry })
@@ -143,7 +145,7 @@ export const actions = {
 
     async unsharePrompt({ dispatch }, { promptid, userid, sender }) {
         try {
-            const res = await this.$axios.delete(`${API}/share/${userid}?promptid=${promptid}&sender=${sender}`)
+            const res = await this.$axios.delete(`api/share/${userid}?promptid=${promptid}&sender=${sender}`)
             if (res.status === 204) {
                 await dispatch('getSharedWithMe', { userid })
             }
@@ -156,7 +158,7 @@ export const actions = {
 
     async getSharedWithMe({ commit }, { userid }) {
         try {
-            const res = await this.$axios.get(`${API}/share/${userid}?type=entries`)
+            const res = await this.$axios.get(`api/share/${userid}?type=entries`)
             if (res.status === 200) {
                 if (res.data.length !== 0) {
                     for (let i = 0; i < res.data.length; ++i) {
@@ -167,7 +169,7 @@ export const actions = {
                 }
                 else if (res.data.length === 0) await commit('setEntriesSharedWithMe', [])
             }
-            const res2 = await this.$axios.get(`${API}/share/${userid}?type=prompts`)
+            const res2 = await this.$axios.get(`api/share/${userid}?type=prompts`)
             if (res2.status === 200) {
                 if (res2.data.length !== 0) {
                     for (let i = 0; i < res2.data.length; ++i) {
