@@ -61,9 +61,9 @@ export default {
   proxy: {
     '/api/': {
       target: 'http://ec2-18-144-43-167.us-west-1.compute.amazonaws.com:3001',
-      // pathRewrite: {
-      //   '^/api/': '/'
-      // }
+      pathRewrite: {
+        '^/api/': '/'
+      }
     }
   },
 
