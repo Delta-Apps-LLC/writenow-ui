@@ -54,7 +54,17 @@ export default {
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
     // Workaround to avoid enforcing hard-coded localhost:3000: https://github.com/nuxt-community/axios-module/issues/308
-    baseURL: '/',
+    // baseURL: '/',
+    proxy: true
+  },
+
+  proxy: {
+    '/api/': {
+      target: 'http://ec2-18-144-43-167.us-west-1.compute.amazonaws.com:3001',
+      // pathRewrite: {
+      //   '^/api/': '/'
+      // }
+    }
   },
 
   // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify
@@ -84,11 +94,11 @@ export default {
   build: {
   },
 
-  serverMiddleware: [
-    // Proxy middleware
-    createProxyMiddleware('/api', {
-      target: 'http://ec2-18-144-43-167.us-west-1.compute.amazonaws.com:3001',
-      changeOrigin: true,
-    })
-  ]
+  // serverMiddleware: [
+  //   // Proxy middleware
+  //   createProxyMiddleware('/api', {
+  //     target: 'http://ec2-18-144-43-167.us-west-1.compute.amazonaws.com:3001',
+  //     changeOrigin: true,
+  //   })
+  // ]
 }
