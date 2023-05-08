@@ -31,6 +31,15 @@ export const mutations = {
 
 // actions should call mutations
 export const actions = {
+    async checkHealth({ commit }, {}) {
+        try {
+            const res = await this.$axios.get(`api/health`)
+            console.log(res)
+        } catch (err) {
+            console.log(err)
+        }
+    },
+
     async getPrompt({ commit, state }, { isNew }) {
         // generate new prompt
         const response = await this.$axios.get(`api/prompts`)
