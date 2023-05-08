@@ -33,7 +33,7 @@ export const mutations = {
 export const actions = {
     async checkHealth({ commit }) {
         try {
-            const res = await this.$axios.get(`/api/health`)
+            const res = await this.$axios.get(`${API}/api/health`)
             console.log(res)
         } catch (err) {
             console.log(err)
@@ -42,7 +42,7 @@ export const actions = {
 
     async getPrompt({ commit, state }, { isNew }) {
         // generate new prompt
-        const response = await this.$axios.get(`/api/prompts`)
+        const response = await this.$axios.get(`${API}/api/prompts`)
         if (response.status === 200) {
             await commit('setPrompt', response.data)
             localStorage.setItem('prompt', JSON.stringify(response.data))
@@ -51,7 +51,7 @@ export const actions = {
             if (isNew) {
               try {
                 // add that new prompt to active_prompt table
-                const res = await this.$axios.post(`/api/prompts`, {
+                const res = await this.$axios.post(`${API}/api/prompts`, {
                     userid: JSON.parse(state.user).id,
                     promptid: response.data.promptid,
                     dateadded: new Date().toDateString()
@@ -66,7 +66,7 @@ export const actions = {
           else {
               try {
                 // update the user's active prompt
-                const res = await this.$axios.put(`/api/prompts/${JSON.parse(state.user).id}`, {
+                const res = await this.$axios.put(`${API}/api/prompts/${JSON.parse(state.user).id}`, {
                     promptid: response.data.promptid,
                     dateadded: new Date().toDateString()
                 })
@@ -84,7 +84,7 @@ export const actions = {
         const today = new Date().toDateString()
         try {
             // get the user's active prompt
-            const active_prompt = await this.$axios.get(`/api/prompts/${JSON.parse(state.user).id}`)
+            const active_prompt = await this.$axios.get(`${API}/api/prompts/${JSON.parse(state.user).id}`)
             // prompt is old, get a new one
             if (active_prompt.data.dateadded !== today) {
                 dispatch('getPrompt', { isNew: false })
@@ -101,7 +101,7 @@ export const actions = {
 
     async signup({ dispatch, commit }, { firstname, lastname, username, password }) {
         try {
-            const response = await axios.post(`/api/accounts`, {
+            const response = await axios.post(`${API}/api/accounts`, {
                 firstname: firstname,
                 lastname: lastname,
                 username: username,
@@ -120,7 +120,7 @@ export const actions = {
 
     async login({ dispatch, commit }, { username, password, isNew }) {
         try {
-            const response = await this.$axios.put(`/api/authentication/login`, {
+            const response = await this.$axios.put(`${API}/api/authentication/login`, {
                 username,
                 password,
                 isNew
@@ -144,7 +144,7 @@ export const actions = {
     },
 
     async logout ({ commit }) {
-        const res = await this.$axios.put(`/api/authentication/logout`)
+        const res = await this.$axios.put(`${API}/api/authentication/logout`)
         if (res.status === 200) {
             localStorage.removeItem('prompt')
             localStorage.removeItem('newestEntry')
@@ -157,7 +157,7 @@ export const actions = {
 
     async getNotifTime({ commit, state }) {
         try {
-            const res = await this.$axios.get(`/api/accounts/${JSON.parse(state.user).id}`)
+            const res = await this.$axios.get(`${API}/api/accounts/${JSON.parse(state.user).id}`)
             if (res.status === 200) {
                 await commit('notifTime', await prettyTime(res.data.notif_time))
             }
@@ -171,18 +171,18 @@ export const actions = {
     async update({ dispatch }, { currentPass, newPass, notif_time, userid }) {
         try {
             if (currentPass === undefined && newPass === undefined && notif_time !== undefined) {
-                const res = await this.$axios.put(`/api/accounts/${userid}?notif_time=${notif_time}`)
+                const res = await this.$axios.put(`${API}/api/accounts/${userid}?notif_time=${notif_time}`)
                 if (res.status === 200) {
                     alert('Your notification time has been successfully updated. It will take effect in the next day.')
                     dispatch('getNotifTime')
                 }
             } else if (currentPass !== undefined && newPass !== undefined && notif_time === undefined) {
-                const res = await this.$axios.put(`/api/accounts/${userid}?currentPass=${currentPass}&newPass=${newPass}`)
+                const res = await this.$axios.put(`${API}/api/accounts/${userid}?currentPass=${currentPass}&newPass=${newPass}`)
                 if (res.status === 200) {
                     alert('Your password has been successfully updated')
                 }
             } else if (currentPass !== undefined && newPass !== undefined && notif_time !== undefined) {
-                const res = await this.$axios.put(`/api/accounts/${userid}?currentPass=${currentPass}&newPass=${newPass}&notif_time=${notif_time}`)
+                const res = await this.$axios.put(`${API}/api/accounts/${userid}?currentPass=${currentPass}&newPass=${newPass}&notif_time=${notif_time}`)
                 if (res.status === 200) {
                     alert('Your password and notification time have been successfully updated. Your new notification time will take effect in the next day.')
                     await dispatch('getNotifTime')
@@ -203,7 +203,7 @@ export const actions = {
 
     async delete({ commit }, { userid }) {
         try {
-            const res = await this.$axios.delete(`/api/accounts/${userid}`)
+            const res = await this.$axios.delete(`${API}/api/accounts/${userid}`)
             if (res.status === 204) {
                 commit('setUser', null)
                 localStorage.removeItem('prompt')
