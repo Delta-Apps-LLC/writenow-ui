@@ -132,11 +132,11 @@
     >
       <span class="footer">&copy; {{ new Date().getFullYear() }} Delta Apps</span>
       &ensp;
-      <a class="footer" target="_blank" href="privacy_policy.pdf">Privacy Policy</a>
+      <a class="footer" target="_blank" href="https://deltaapps.dev/writenow/privacy_policy.pdf">Privacy Policy</a>
       &ensp;
       <v-divider vertical />
       &ensp;
-      <a class="footer" target="_blank" href="terms_conditions.pdf">Terms</a>
+      <a class="footer" target="_blank" href="https://deltaapps.dev/writenow/terms_conditions.pdf">Terms</a>
       <v-spacer />
       <span class="footer">{{contact}}</span>
     </v-footer>

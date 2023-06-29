@@ -2,7 +2,7 @@
     <v-app>
       <v-row>
         <v-col class="intro-page">
-          <v-btn @click="checkHealth()">Health</v-btn>
+          <!-- <v-btn @click="checkHealth()">Health</v-btn> -->
           <div class="full-intro" :style="{'width': windowWidth < 750 ? '80%' : null}">
             <h3 class="text-center" v-if="windowWidth >= 750"
             >
