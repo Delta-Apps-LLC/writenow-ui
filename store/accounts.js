@@ -127,6 +127,7 @@ export const actions = {
             })
             console.log(response.status)
             if (response.status === 200) {
+                console.log('in!')
                 await commit('setUser', getUserFromCookie())
                 await commit('setIsNew', isNew)
                 this.$router.push('/')
