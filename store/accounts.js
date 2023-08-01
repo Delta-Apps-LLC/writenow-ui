@@ -1,9 +1,9 @@
-import { API } from "~/store/api"
+import { API, decodeToken, retrieveToken, setToken } from "~/store/api"
 import axios from "axios"
 
 export const state = () => {
     return {
-        user: getUserFromCookie(),
+        user: decodeToken(retrieveToken()),
         prompt: {},
         notifTime: "",
         isNew: false,
@@ -42,7 +42,11 @@ export const actions = {
 
     async getPrompt({ commit, state }, { isNew }) {
         // generate new prompt
-        const response = await this.$axios.get(`${API}/api/prompts`)
+        const response = await this.$axios.get(`${API}/api/prompts`, {
+            headers: {
+                Authorization: `Bearer ${retrieveToken()}`
+            }
+        })
         if (response.status === 200) {
             await commit('setPrompt', response.data)
             localStorage.setItem('prompt', JSON.stringify(response.data))
@@ -55,6 +59,10 @@ export const actions = {
                     userid: JSON.parse(state.user).id,
                     promptid: response.data.promptid,
                     dateadded: new Date().toDateString()
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${retrieveToken()}`
+                    }
                 })
                 if (res.status === 201) {
                 }
@@ -66,9 +74,13 @@ export const actions = {
           else {
               try {
                 // update the user's active prompt
-                const res = await this.$axios.put(`${API}/api/prompts/${JSON.parse(state.user).id}`, {
+                const res = await this.$axios.put(`${API}/api/prompts/${state.user.id}`, {
                     promptid: response.data.promptid,
                     dateadded: new Date().toDateString()
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${retrieveToken()}`
+                    }
                 })
                 if (res.status === 200) {
                     console.log('Success!')
@@ -84,14 +96,18 @@ export const actions = {
         const today = new Date().toDateString()
         try {
             // get the user's active prompt
-            const active_prompt = await this.$axios.get(`${API}/api/prompts/${JSON.parse(state.user).id}`)
+            const active_prompt = await this.$axios.get(`${API}/api/prompts/${state.user.id}`, {
+                headers: {
+                    Authorization: `Bearer ${retrieveToken()}`
+                }
+            })
             // prompt is old, get a new one
             if (active_prompt.data.dateadded !== today) {
-                dispatch('getPrompt', { isNew: false })
+                await dispatch('getPrompt', { isNew: false })
             }
             // maintain current active prompt
             else {
-                commit('setPrompt', active_prompt.data)
+                await commit('setPrompt', active_prompt.data)
                 localStorage.setItem('prompt', JSON.stringify(active_prompt.data))
             }
         } catch (err) {
@@ -107,7 +123,6 @@ export const actions = {
                 username: username,
                 password: password
             })
-            console.log(response)
             if (response.status === 201) {
                 dispatch('login', {
                     username: username, password: password, isNew: true
@@ -125,17 +140,16 @@ export const actions = {
                 password,
                 isNew
             })
-            console.log(response.status)
             if (response.status === 200) {
-                console.log(getUserFromCookie())
-                await commit('setUser', getUserFromCookie())
+                setToken(response.data)
+                await commit('setUser', decodeToken(retrieveToken()))
                 await commit('setIsNew', isNew)
                 this.$router.push('/')
                 isNew ? dispatch('getPrompt', { isNew: true }) : dispatch('activePrompt')
             }
         } catch (err) {
-            this.$router.push('/login')
             console.log(err)
+            this.$router.push('/login')
             if (err.response.status === 401) {
                 alert('Email or password is incorrect.')
             } else {
@@ -145,12 +159,13 @@ export const actions = {
     },
 
     async logout ({ commit }) {
-        const res = await this.$axios.put(`${API}/api/authentication/logout`)
+        const res = await this.$axios.get(`${API}/api/authentication/logout`)
         if (res.status === 200) {
             localStorage.removeItem('prompt')
             localStorage.removeItem('newestEntry')
             localStorage.removeItem('entriesList')
             localStorage.removeItem('tab')
+            localStorage.removeItem('accessToken')
             commit('setUser', null)
             this.$router.push('/login')
         }
@@ -158,9 +173,13 @@ export const actions = {
 
     async getNotifTime({ commit, state }) {
         try {
-            const res = await this.$axios.get(`${API}/api/accounts/${JSON.parse(state.user).id}`)
+            const res = await this.$axios.get(`${API}/api/accounts/${state.user.id}`, {
+                headers: {
+                    Authorization: `Bearer ${retrieveToken()}`
+                }
+            })
             if (res.status === 200) {
-                await commit('notifTime', await prettyTime(res.data.notif_time))
+                await commit('notifTime', prettyTime(res.data.notif_time))
             }
         } catch (err) {
             if (err.response.status === 404 || err.response.status === 400) {
@@ -172,18 +191,30 @@ export const actions = {
     async update({ dispatch }, { currentPass, newPass, notif_time, userid }) {
         try {
             if (currentPass === undefined && newPass === undefined && notif_time !== undefined) {
-                const res = await this.$axios.put(`${API}/api/accounts/${userid}?notif_time=${notif_time}`)
+                const res = await this.$axios.put(`${API}/api/accounts/${userid}?notif_time=${notif_time}`, {
+                    headers: {
+                        Authorization: `Bearer ${retrieveToken()}`
+                    }
+                })
                 if (res.status === 200) {
                     alert('Your notification time has been successfully updated. It will take effect in the next day.')
-                    dispatch('getNotifTime')
+                    await dispatch('getNotifTime')
                 }
             } else if (currentPass !== undefined && newPass !== undefined && notif_time === undefined) {
-                const res = await this.$axios.put(`${API}/api/accounts/${userid}?currentPass=${currentPass}&newPass=${newPass}`)
+                const res = await this.$axios.put(`${API}/api/accounts/${userid}?currentPass=${currentPass}&newPass=${newPass}`, {
+                    headers: {
+                        Authorization: `Bearer ${retrieveToken()}`
+                    }
+                })
                 if (res.status === 200) {
                     alert('Your password has been successfully updated')
                 }
             } else if (currentPass !== undefined && newPass !== undefined && notif_time !== undefined) {
-                const res = await this.$axios.put(`${API}/api/accounts/${userid}?currentPass=${currentPass}&newPass=${newPass}&notif_time=${notif_time}`)
+                const res = await this.$axios.put(`${API}/api/accounts/${userid}?currentPass=${currentPass}&newPass=${newPass}&notif_time=${notif_time}`, {
+                    headers: {
+                        Authorization: `Bearer ${retrieveToken()}`
+                    }
+                })
                 if (res.status === 200) {
                     alert('Your password and notification time have been successfully updated. Your new notification time will take effect in the next day.')
                     await dispatch('getNotifTime')
@@ -204,7 +235,11 @@ export const actions = {
 
     async delete({ commit }, { userid }) {
         try {
-            const res = await this.$axios.delete(`${API}/api/accounts/${userid}`)
+            const res = await this.$axios.delete(`${API}/api/accounts/${userid}`, {
+                headers: {
+                    Authorization: `Bearer ${retrieveToken()}`
+                }
+            })
             if (res.status === 204) {
                 commit('setUser', null)
                 localStorage.removeItem('prompt')

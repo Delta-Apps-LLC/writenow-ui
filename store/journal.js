@@ -25,11 +25,15 @@ export const mutations = {
 export const actions = {
   async submit({ commit }, { response, userid, promptid }) {
     const res = await this.$axios.post(`${API}/api/entries`, {
-            response: response,
-            date: await todayTimestamp(),
-            userid: userid,
-            promptid: promptid
-        })
+      response: response,
+      date: await todayTimestamp(),
+      userid: userid,
+      promptid: promptid
+    }, {
+      headers: {
+          Authorization: `Bearer ${retrieveToken()}`
+      }
+    })
     if (res.status === 201) {
         await commit('newestEntry', res.data)
         localStorage.setItem('newestEntry', JSON.stringify(res.data))
@@ -40,9 +44,13 @@ export const actions = {
 
   async loadEntries({ commit, rootState }) {
     let today = await todayTimestamp()
-    let userid = JSON.parse(rootState.accounts.user).id
+    let userid = rootState.accounts.user.id
     try {
-      const res = await this.$axios.get(`${API}/api/entries/${userid}/${today}`)
+      const res = await this.$axios.get(`${API}/api/entries/${userid}/${today}`, {
+        headers: {
+            Authorization: `Bearer ${retrieveToken()}`
+        }
+      })
       if (res.status === 200) {
         for (let i = 0; i < res.data.length; ++i) {
           res.data[i].date = await parseDate(res.data[i].date)
@@ -59,7 +67,11 @@ export const actions = {
   },
 
   async loadTopics({ commit }) {
-    const topics = await this.$axios.get(`${API}/api/topics`)
+    const topics = await this.$axios.get(`${API}/api/topics`, {
+      headers: {
+          Authorization: `Bearer ${retrieveToken()}`
+      }
+    })
     if (topics.status === 200) {
       await commit('topics', topics.data)
     }
@@ -72,6 +84,10 @@ export const actions = {
       (filterMethod.toString().length === 1) ? topicid = filterMethod : afterDate = filterMethod
       const res = await this.$axios.put(`${API}/api/entries/${entryid}`, {
         text: text
+      }, {
+        headers: {
+            Authorization: `Bearer ${retrieveToken()}`
+        }
       })
       if (res.status === 200) {
         //alert(`Entry number ${entryid} has been updated`)
@@ -94,7 +110,11 @@ export const actions = {
       let afterDate = ""
       let topicid = null;
       (filterMethod.toString().length === 1) ? topicid = filterMethod : afterDate = filterMethod
-      const res = await this.$axios.delete(`${API}/api/entries/${entryid}`)
+      const res = await this.$axios.delete(`${API}/api/entries/${entryid}`, {
+        headers: {
+            Authorization: `Bearer ${retrieveToken()}`
+        }
+      })
       if (res.status === 204) {
         //alert(`Entry number ${entryid} has successfully been deleted`)
         if (filterMethod === "today") dispatch('loadEntries')
@@ -114,7 +134,11 @@ export const actions = {
   async filterDate({ commit }, { afterDate, userid }) {
     await commit('entriesList', [])
     afterDate += 'T00:00:00.000Z'
-    const res = await this.$axios.get(`${API}/api/entries?afterdate=${afterDate}&userid=${userid}`)
+    const res = await this.$axios.get(`${API}/api/entries?afterdate=${afterDate}&userid=${userid}`, {
+      headers: {
+          Authorization: `Bearer ${retrieveToken()}`
+      }
+    })
     if (res.status === 200) {
       for (let i = 0; i < res.data.length; ++i) {
         res.data[i].date = await parseDate(res.data[i].date)
@@ -126,7 +150,11 @@ export const actions = {
 
   async filterTopic({ commit }, { topicid, userid }) {
     await commit('entriesList', [])
-    const res = await this.$axios.get(`${API}/api/entries?topicid=${topicid}&userid=${userid}`)
+    const res = await this.$axios.get(`${API}/api/entries?topicid=${topicid}&userid=${userid}`, {
+      headers: {
+          Authorization: `Bearer ${retrieveToken()}`
+      }
+    })
     if (res.status === 200) {
       for (let i = 0; i < res.data.length; ++i) {
         res.data[i].date = await parseDate(res.data[i].date)

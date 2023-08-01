@@ -1,3 +1,21 @@
-// export const API = "http://ec2-18-144-43-167.us-west-1.compute.amazonaws.com:3001"
-// export const API = "localhost:3001/api"
+import jwt_decode from "jwt-decode";
+
 export const API = "https://api.joinwritenow.com"
+// export const API = 'https://driving-component-dna-analyze.trycloudflare.com'
+
+export function retrieveToken() {
+    return localStorage.getItem("accessToken")
+}
+
+export function decodeToken(token) {
+    const decoded = jwt_decode(token);
+    return decoded; //.user_id
+}
+
+export function setToken(token) {
+    localStorage.setItem("accessToken", token);
+}
+
+export function deleteToken() {
+    localStorage.removeItem("accessToken");
+}

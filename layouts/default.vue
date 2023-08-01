@@ -145,6 +145,7 @@
 
 <script>
 import Shepherd from 'shepherd.js'
+import { decodeToken, retrieveToken } from '~/store/api'
 export default {
   name: 'DefaultLayout',
 
@@ -153,6 +154,7 @@ export default {
   },
 
   mounted () {
+    this.$store.commit('setUser', decodeToken(retrieveToken()))
     if (this.isNew) {
       this.addSteps()
       this.tour.start()
@@ -399,7 +401,7 @@ export default {
 
   computed: {
     user () {
-      return JSON.parse(this.$store.state.accounts.user)
+      return this.$store.state.accounts.user
     },
 
     notifs () {

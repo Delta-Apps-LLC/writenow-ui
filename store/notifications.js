@@ -19,7 +19,7 @@ export const mutations = {
 // actions should call mutations
 export const actions = {
     async getNotifs({ commit, rootState }, {}) {
-        const userid = JSON.parse(rootState.accounts.user).id
+        const userid = rootState.accounts.user.id
         try {
             const res = await this.$axios.get(`${API}/api/notifications?userid=${userid}`)
             if (res.status === 200) {
