@@ -3,7 +3,7 @@ import axios from "axios"
 
 export const state = () => {
     return {
-        user: retrieveToken(),
+        user: retrieveToken() ? decodeToken(retrieveToken()) : retrieveToken(),
         prompt: {},
         notifTime: "",
         isNew: false,
