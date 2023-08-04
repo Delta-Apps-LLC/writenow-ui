@@ -154,7 +154,7 @@ export default {
   },
 
   mounted () {
-    this.$store.commit('setUser', decodeToken(retrieveToken()))
+    this.$store.commit('accounts/setUser', decodeToken(retrieveToken()))
     if (this.isNew) {
       this.addSteps()
       this.tour.start()
