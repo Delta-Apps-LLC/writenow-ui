@@ -1,7 +1,7 @@
 import jwt_decode from "jwt-decode";
 
 export const API = "https://api.joinwritenow.com"
-// export const API = 'https://scottish-assume-findings-antique.trycloudflare.com'
+// export const API = 'https://phillips-blink-running-cons.trycloudflare.com'
 
 export function retrieveToken() {
     return localStorage.getItem("accessToken")

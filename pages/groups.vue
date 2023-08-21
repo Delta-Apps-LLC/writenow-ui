@@ -78,7 +78,7 @@ export default {
 
   computed: {
     user () {
-      return JSON.parse(this.$store.state.accounts.user)
+      return this.$store.state.accounts.user
     },
 
     userGroups () {

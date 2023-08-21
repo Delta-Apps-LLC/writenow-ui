@@ -3,7 +3,7 @@ import axios from "axios"
 
 export const state = () => {
     return {
-        user: retrieveToken() ? decodeToken(retrieveToken()) : retrieveToken(),
+        user: retrieveToken() ? decodeToken(retrieveToken()) : null,
         prompt: {},
         notifTime: "",
         isNew: false,
@@ -56,7 +56,7 @@ export const actions = {
               try {
                 // add that new prompt to active_prompt table
                 const res = await this.$axios.post(`${API}/api/prompts`, {
-                    userid: JSON.parse(state.user).id,
+                    userid: state.user.user_id,
                     promptid: response.data.promptid,
                     dateadded: new Date().toDateString()
                 }, {
@@ -74,7 +74,7 @@ export const actions = {
           else {
               try {
                 // update the user's active prompt
-                const res = await this.$axios.put(`${API}/api/prompts/${state.user.id}`, {
+                const res = await this.$axios.put(`${API}/api/prompts/${state.user.user_id}`, {
                     promptid: response.data.promptid,
                     dateadded: new Date().toDateString()
                 }, {
@@ -96,7 +96,7 @@ export const actions = {
         const today = new Date().toDateString()
         try {
             // get the user's active prompt
-            const active_prompt = await this.$axios.get(`${API}/api/prompts/${state.user.id}`, {
+            const active_prompt = await this.$axios.get(`${API}/api/prompts/${state.user.user_id}`, {
                 headers: {
                     Authorization: `Bearer ${retrieveToken()}`
                 }
@@ -173,7 +173,7 @@ export const actions = {
 
     async getNotifTime({ commit, state }) {
         try {
-            const res = await this.$axios.get(`${API}/api/accounts/${state.user.id}`, {
+            const res = await this.$axios.get(`${API}/api/accounts/${state.user.user_id}`, {
                 headers: {
                     Authorization: `Bearer ${retrieveToken()}`
                 }

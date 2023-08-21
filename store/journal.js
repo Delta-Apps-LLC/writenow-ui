@@ -44,7 +44,7 @@ export const actions = {
 
   async loadEntries({ commit, rootState }) {
     let today = await todayTimestamp()
-    let userid = rootState.accounts.user.id
+    let userid = rootState.accounts.user.user_id
     try {
       const res = await this.$axios.get(`${API}/api/entries/${userid}/${today}`, {
         headers: {
