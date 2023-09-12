@@ -19,7 +19,7 @@ export const mutations = {
 // actions should call mutations
 export const actions = {
     async getNotifs({ commit, rootState }, {}) {
-        const userid = rootState.accounts.user.user_id
+        const userid = rootState.accounts.user.id
         try {
             const res = await this.$axios.get(`${API}/api/notifications?userid=${userid}`)
             if (res.status === 200) {
@@ -42,7 +42,7 @@ export const actions = {
             const name = `${rootState.accounts.user.firstname} ${rootState.accounts.user.lastname}`
             const res = await this.$axios.post(`${API}/api/notifications`, {
                     userid: userid,
-                    senderid: rootState.accounts.user.user_id,
+                    senderid: rootState.accounts.user.id,
                     sendername: name,
                     date: await todayTimestamp(),
                     journalid: journalid,
@@ -72,7 +72,7 @@ export const actions = {
 
     async markAllAsRead({ commit, rootState }, {}) {
         try {
-            const userid = rootState.accounts.user.user_id
+            const userid = rootState.accounts.user.id
             const res = await this.$axios.put(`${API}/api/notifications?userid=${userid}`)
             if (res.status === 200) {
                 for (let i = 0; i < res.data.length; ++i) {

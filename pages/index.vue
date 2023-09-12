@@ -76,9 +76,9 @@ export default {
     window.addEventListener('resize', this.resizeHandler)
   },
 
-  mounted() {
-    this.$store.commit('accounts/setPrompt', JSON.parse(localStorage.getItem('prompt')))
-    this.$store.dispatch('accounts/activePrompt')
+  async mounted() {
+    await this.$store.dispatch('accounts/activePrompt')
+    await this.$store.commit('accounts/setPrompt', JSON.parse(localStorage.getItem('prompt')))
   },
 
   data () {

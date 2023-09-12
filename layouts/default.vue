@@ -149,18 +149,18 @@ import { decodeToken, retrieveToken } from '~/store/api'
 export default {
   name: 'DefaultLayout',
 
-  created () {
+  async created () {
     window.addEventListener('resize', this.resizeHandler)
-  },
-
-  mounted () {
-    this.$store.commit('accounts/setUser', decodeToken(retrieveToken()))
+    await this.$store.commit('accounts/setUser', decodeToken(retrieveToken()))
     if (this.isNew) {
       this.addSteps()
       this.tour.start()
       this.tour.on('complete', this.onboardingComplete)
     }
-    this.$store.dispatch('notifications/getNotifs', {})
+    await this.$store.dispatch('notifications/getNotifs', {})
+  },
+
+  async mounted () {
   },
 
   data () {
