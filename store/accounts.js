@@ -142,7 +142,13 @@ export const actions = {
                 username,
                 password,
                 isNew
-            })
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${retrieveToken()}`
+                }
+            }
+            )
             if (response.status === 200) {
                 setToken(response.data)
                 await commit('setUser', decodeToken(retrieveToken()))
