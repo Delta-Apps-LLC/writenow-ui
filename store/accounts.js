@@ -111,7 +111,10 @@ export const actions = {
                 localStorage.setItem('prompt', JSON.stringify(active_prompt.data))
             }
         } catch (err) {
-            // do something
+            console.log(err)
+            if (err.response.status == 404) {
+                await dispatch('getPrompt', { isNew: true })
+            }
         }
     },
 
@@ -124,7 +127,7 @@ export const actions = {
                 password: password
             })
             if (response.status === 201) {
-                dispatch('login', {
+                await dispatch('login', {
                     username: username, password: password, isNew: true
                 })
             }
